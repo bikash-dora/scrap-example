@@ -1,0 +1,106 @@
+<!doctype html>
+<html ng-app="advertListApp">
+<head>
+    <title>Real estate adverts aggregator</title>
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/angular.min.js"></script>
+    <script src="js/app.js"></script>
+
+</head>
+<body ng-controller="AdvertListController" ng-init="get_adverts(0)">
+<nav class="navbar sticky-top navbar-dark bg-dark">
+    <div class="navbar-brand mb-0 h1">Overview</div>
+        <ul class="pagination pagination-sm" style="padding-top: 15px">
+            <li class="page-item {{disable_prev ? 'disabled' : ''}}">
+                <a ng-if="disable_prev == true" class="page-link disabled" href="#" tabindex="-1" >
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a ng-if="disable_prev == false" class="page-link" href="#" ng-click="get_adverts(page - 1)">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                </a>
+            </li>
+            <li class="page-item {{$index == page ? 'active' : ''}}" ng-repeat="n in range(0,number_of_pages-1)">
+                <span ng-if="n == page" class="page-link" >{{n + 1}}<span class="sr-only">(current)</span></span>
+                <a ng-if="n != page" class="page-link" href="#" ng-click="get_adverts(n)">{{n + 1}}</a>
+            </li>
+            <li class="page-item {{disable_next ? 'disabled' : ''}}">
+                <a ng-if="disable_next == true" class="page-link disabled" href="#" tabindex="-1" >
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                </a>
+                <a ng-if="disable_next == false" class="page-link" href="#" ng-click="get_adverts(page + 1)">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </li>
+        </ul>
+</nav>
+<div class="container-fluid" style="padding: 5px auto">
+    <div class="row shadow-sm {{$even ? 'bg-white' : 'bg-light'}}" ng-repeat="a in adverts">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4><a href="{{a.link}}" target="_blank">{{a.title}}</a></h4>
+                    <p class="text-info">Summary:</p>
+                    <ul>
+                        <li>Date: {{(a.timestamp + tz_offset) * 1000 | date:'yyyy-MM-dd HH:mm:ss'}}</li>
+                        <li>Area: <strong>{{a.area}} m2</strong></li>
+                        <li>Price: <strong>{{a.price}} EUR</strong></li>
+                        <li>Location: <strong>{{a.location.join(', ')}}</strong></li>
+                        <li>Advertiser: {{a.advertiser.name}}, tel: <strong>{{a.advertiser.phones.join(', ')}}</strong></li>
+                    </ul>
+                    <p class="text-info">Metadata:</p>
+                    <ul>
+                        <li ng-repeat="md in a.metadata">{{md.replace('=', ': ')}}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-info">Description:</p>
+                    <p>{{a.text}}</p>
+                    <div ng-if="a.similar_adverts.length > 0">
+                        <p class="text-info">Same adverts on different addresses:</p>
+                        <ul>
+                            <li ng-repeat="s in a.similar_adverts"><a href="{{s.link}}" target="_blank">{{s.title}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div id="carouselExampleIndicators_{{a.title_hash}}" class="carousel slide"
+                 style="height: 400px; margin: 3px auto">
+                <div class="carousel-inner">
+                    <div class="carousel-item {{$first ? 'active' : '' }}" ng-repeat="image in a.images"
+                         style="background-color: #000000; width: 100%; margin: auto">
+                        <img src="{{image}}" alt="" style="width: 100%; margin: auto; height: 400px">
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleIndicators_{{a.title_hash}}" role="button"
+                   data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleIndicators_{{a.title_hash}}" role="button"
+                   data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="js/jquery-slim.js"></script>
+<script src="js/popper.js"></script>
+<script src="js/bootstrap.js"></script>
+</body>
+</html>

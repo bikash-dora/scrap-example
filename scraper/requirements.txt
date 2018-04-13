@@ -1,0 +1,2 @@
+MechanicalSoup==0.10.0
+simplejson==3.13.2

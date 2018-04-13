@@ -1,0 +1,68 @@
+service: sls-basics
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: eu-central-1
+  memorySize: 128
+  timeout: 300
+  environment:
+    STAGE: dev
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamoDB:*"
+      Resource: "*"
+
+package:
+  individually: true
+
+functions:
+  scraper:
+    handler: lambda_handler.handle
+    module: scraper
+    memorySize: 512
+    events:
+      - schedule: cron(0 11 * * ? *)
+  adverts_controller:
+    handler: lambda_handler.handle
+    module: adverts_controller
+    events:
+      - http:
+          path: adverts/get
+          method: get
+  db_cleaner:
+    handler: lambda_handler.handle
+    module: db_cleaner
+    events:
+      - schedule: cron(0 3 * * ? *)
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+  client:
+    bucketName: adverts-website-bucket
+    distributionFolder: client/dist
+    indexDocument: index.html
+    errorDocument: error.html
+
+resources:
+  Resources:
+    advertisementsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: adverts-dev
+        AttributeDefinitions:
+          - AttributeName: title_hash
+            AttributeType: S
+        KeySchema:
+          - AttributeName: title_hash
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+plugins:
+  - serverless-python-requirements
+  - serverless-finch

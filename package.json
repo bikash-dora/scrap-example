@@ -1,0 +1,11 @@
+{
+  "name": "sls-basics",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless-finch": "^1.4.0"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^4.0.0"
+  }
+}
