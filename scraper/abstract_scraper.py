@@ -18,6 +18,7 @@ class AbstractScraper:
             try:
                 processed = self.process_link(link)
                 processed['title_hash'] = hashlib.sha1(processed['title'].encode('utf-8')).hexdigest()
+                processed['processed'] = False
                 data.append(processed)
             except Exception as e:
                 print('Failed to process {}, error: {}'.format(link, str(e)))

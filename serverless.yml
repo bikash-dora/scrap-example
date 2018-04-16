@@ -24,7 +24,7 @@ functions:
     module: scraper
     memorySize: 512
     events:
-      - schedule: cron(0 11 * * ? *)
+      - schedule: cron(0 6,12,18 * * ? *)
   adverts_controller:
     handler: lambda_handler.handle
     module: adverts_controller
@@ -37,6 +37,11 @@ functions:
     module: db_cleaner
     events:
       - schedule: cron(0 3 * * ? *)
+  aggregator:
+    handler: lambda_handler.handle
+    module: aggregator
+    events:
+      - schedule: cron(0/30 6-8,12-14,18-20 * * ? *)
 
 custom:
   pythonRequirements:
@@ -52,7 +57,20 @@ resources:
     advertisementsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: adverts-dev
+        TableName: ScrapedAdverts-dev
+        AttributeDefinitions:
+          - AttributeName: title_hash
+            AttributeType: S
+        KeySchema:
+          - AttributeName: title_hash
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    filteredAdvertisementsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: FilteredAdverts-dev
         AttributeDefinitions:
           - AttributeName: title_hash
             AttributeType: S

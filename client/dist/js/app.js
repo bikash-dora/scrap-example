@@ -4,7 +4,12 @@ advertListApp.controller('AdvertListController', function AdvertListController($
     $scope.adverts = [];
     $scope.tz_offset = new Date().getTimezoneOffset() * 60;
 
+
     $scope.get_adverts = function (page_number) {
+        var start = new Date();
+        start.setHours(0,0,0,0);
+        $scope.start_of_day = start.getTime();
+        console.log('Start of day: ' + $scope.start_of_day);
         if (page_number < 0) {
             page_number = 0;
         }

@@ -22,7 +22,7 @@ class DynamoDBHandler:
         return self._table
 
 
-db_handler = DynamoDBHandler('adverts-{}'.format(env['STAGE']))
+db_handler = DynamoDBHandler('ScrapedAdverts-{}'.format(env['STAGE']))
 
 
 def handle(event, context):

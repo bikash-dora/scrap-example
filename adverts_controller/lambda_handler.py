@@ -3,7 +3,7 @@ import boto3
 import simplejson as json
 import math
 
-table = boto3.resource('dynamodb').Table('adverts-{}'.format(env['STAGE']))
+table = boto3.resource('dynamodb').Table('FilteredAdverts-{}'.format(env['STAGE']))
 
 
 def handle(event, context):
