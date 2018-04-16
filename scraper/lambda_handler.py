@@ -1,6 +1,7 @@
 from multiprocessing.dummy import Pool
 from nekretnine_rs_scraper import NekretnineRsScraper
 from oglasi_rs_scraper import OglasiRsScraper
+from nadjidom_rs_scraper import NadjiDomRsScraper
 import time
 import boto3
 from os import environ as env
@@ -14,9 +15,17 @@ sys.setrecursionlimit(10000)
 def handle(event, context):
     start = time.time()
     print('Scraping started')
-    pool = Pool(6)
-    res = [pool.apply_async(NekretnineRsScraper().process, [1]), pool.apply_async(OglasiRsScraper().process, [1]),
-           pool.apply_async(NekretnineRsScraper().process, [2]), pool.apply_async(OglasiRsScraper().process, [2])]
+    pool = Pool(10)
+    res = [pool.apply_async(NekretnineRsScraper().process, [1]),
+           pool.apply_async(NekretnineRsScraper().process, [2]),
+           pool.apply_async(OglasiRsScraper().process, [1]),
+           pool.apply_async(OglasiRsScraper().process, [2]),
+           pool.apply_async(NadjiDomRsScraper().process, [1]),
+           pool.apply_async(NadjiDomRsScraper().process, [2]),
+           pool.apply_async(NadjiDomRsScraper().process, [3]),
+           pool.apply_async(NadjiDomRsScraper().process, [4]),
+           pool.apply_async(NadjiDomRsScraper().process, [5]),
+           pool.apply_async(NadjiDomRsScraper().process, [6])]
     pool.close()
     pool.join()
     end = time.time()
