@@ -2,22 +2,27 @@ from abstract_scraper import AbstractScraper
 from decimal import Decimal
 import time
 import datetime
-
+import requests
+from bs4 import BeautifulSoup
 
 class OglasiRsScraper(AbstractScraper):
 
-    adverts_url = 'https://www.oglasi.rs/oglasi/nekretnine/prodaja/stanova/grad/novi-sad/deo/liman+liman-1+liman-2+liman-3+liman-4?p={PAGE_NUMBER}&i=48&s=d&pr%5Bs%5D=40000&pr%5Be%5D=70000&pr%5Bc%5D=EUR&d%5BKvadratura%5D%5B0%5D=50&d%5BKvadratura%5D%5B1%5D=60&d%5BKvadratura%5D%5B2%5D=70'
+    url = 'https://www.oglasi.rs/oglasi/nekretnine/prodaja/stanova/grad/novi-sad/deo/liman+liman-1+liman-2+liman-3+liman-4?p={PAGE_NUMBER}&i=48&s=d&pr%5Bs%5D=40000&pr%5Be%5D=70000&pr%5Bc%5D=EUR&d%5BKvadratura%5D%5B0%5D=50&d%5BKvadratura%5D%5B1%5D=60&d%5BKvadratura%5D%5B2%5D=70'
 
     def get_name(self):
         return 'Oglasi.rs'
 
     def fetch_links(self, page_number):
-        self.browser().open(self.adverts_url.replace('{PAGE_NUMBER}', str(page_number)))
-        return ['https://www.oglasi.rs{}'.format(a['href']) for a in self.browser().get_current_page().find_all('a', class_='fpogl-list-title')]
+        # self.browser().open(self.url.replace('{PAGE_NUMBER}', str(page_number)))
+        # return ['https://www.oglasi.rs{}'.format(a['href']) for a in self.browser().get_current_page().find_all('a', class_='fpogl-list-title')]
+        soup = BeautifulSoup(requests.get(self.url.replace('{PAGE_NUMBER}', str(page_number))).text, 'lxml')
+        return ['https://www.oglasi.rs{}'.format(a['href']) for a in soup.find_all('a', class_='fpogl-list-title')]
+
 
     def process_link(self, link):
-        self.browser().open(link)
-        page = self.browser().get_current_page()
+        # self.browser().open(link)
+        # page = self.browser().get_current_page()
+        page = BeautifulSoup(requests.get(link).text, 'lxml')
         content = page.find('div', id='content')
         timestamp = int(time.mktime(datetime.datetime.strptime(' '.join(content.find('time').get_text().split()), '%d.%m.%Y. %H:%M:%S').timetuple()))
 

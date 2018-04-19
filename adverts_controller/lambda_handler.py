@@ -2,12 +2,13 @@ from os import environ as env
 import boto3
 import simplejson as json
 import math
-
-table = boto3.resource('dynamodb').Table('FilteredAdverts-{}'.format(env['STAGE']))
+import env_helper
 
 
 def handle(event, context):
-    query_params = event['queryStringParameters']
+    env_helper.check_env(['FILTERED_ADVERTS_TABLE'])
+    query_params = event.get('queryStringParameters')
+    table = boto3.resource('dynamodb').Table(env['FILTERED_ADVERTS_TABLE'])
     res = table.scan()
     items = res['Items']
     while 'LastEvaluatedKey' in res:
@@ -38,6 +39,12 @@ def get_key(item):
     return item['timestamp']
 
 
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
+
+
 def create_response(status_code: int, content: dict):
     return {
         'statusCode': status_code,
@@ -48,5 +55,5 @@ def create_response(status_code: int, content: dict):
             'Access-Control-Allow-Credentials': 'true',
             'Access-Control-Allow-Methods': 'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'
         },
-        'body': json.dumps(content, use_decimal=True)
+        'body': json.dumps(content, use_decimal=True, default=set_default)
     }

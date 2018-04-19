@@ -3,12 +3,10 @@ service: sls-basics
 provider:
   name: aws
   runtime: python3.6
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: eu-central-1
   memorySize: 128
   timeout: 300
-  environment:
-    STAGE: dev
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -17,31 +15,58 @@ provider:
 
 package:
   individually: true
+  exclude:
+    - "**/.eggs/**"
+    - "**/.pytest_cache/**"
+    - "**/*.egg-info/**"
+    - "**/tests/**"
+    - "**/__pycache__/**"
+    - "**/*.iml"
+    - "**/setup.py"
+    - "**/test_*.py"
+    - "**/*_test.py"
 
 functions:
   scraper:
     handler: lambda_handler.handle
     module: scraper
     memorySize: 512
+    environment:
+      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
     events:
       - schedule: cron(0 6,12,18 * * ? *)
+    vendor: ./utils # workaround for including common libs, since package.include has a bug and not working when it package.individually is set to true
   adverts_controller:
     handler: lambda_handler.handle
     module: adverts_controller
+    environment:
+      FILTERED_ADVERTS_TABLE: FilteredAdverts-${opt:stage, self:provider.stage}
     events:
       - http:
           path: adverts/get
           method: get
+    vendor: ./utils
   db_cleaner:
     handler: lambda_handler.handle
     module: db_cleaner
+    environment:
+      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
     events:
       - schedule: cron(0 3 * * ? *)
+    vendor: ./utils
   aggregator:
     handler: lambda_handler.handle
     module: aggregator
+    environment:
+      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
+      FILTERED_ADVERTS_TABLE: FilteredAdverts-${opt:stage, self:provider.stage}
     events:
       - schedule: cron(0/30 6-8,12-14,18-20 * * ? *)
+    vendor: ./utils
+  truncate_db:
+    handler: lambda_handler.handle
+    module: truncate_db
+    vendor: ./utils
 
 custom:
   pythonRequirements:
@@ -57,7 +82,7 @@ resources:
     advertisementsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ScrapedAdverts-dev
+        TableName: ScrapedAdverts-${opt:stage, self:provider.stage}
         AttributeDefinitions:
           - AttributeName: title_hash
             AttributeType: S
@@ -70,7 +95,7 @@ resources:
     filteredAdvertisementsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: FilteredAdverts-dev
+        TableName: FilteredAdverts-${opt:stage, self:provider.stage}
         AttributeDefinitions:
           - AttributeName: title_hash
             AttributeType: S

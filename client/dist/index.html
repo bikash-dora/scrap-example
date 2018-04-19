@@ -49,7 +49,7 @@
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-6">
-                    <h4><a href="{{a.link}}" target="_blank" class="{{((a.timestamp + tz_offset) * 1000) > start_of_day ? 'text-success' : 'text-primary'}}">{{a.title}}</a></h4>
+                    <h4><a href="{{a.link}}" target="_blank" class="{{((a.timestamp + tz_offset) * 1000) > start_of_day ? 'text-success' : 'text-primary'}}">{{a.title}}</a><br><span ng-if="!a.similar_adverts.length" class="badge badge-danger">New</span></h4>
                     <p class="text-info">Summary:</p>
                     <ul>
                         <li>Date: {{(a.timestamp + tz_offset) * 1000 | date:'yyyy-MM-dd HH:mm:ss'}}</li>

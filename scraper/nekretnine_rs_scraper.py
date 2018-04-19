@@ -1,24 +1,29 @@
-import logging
 from abstract_scraper import AbstractScraper
 from decimal import Decimal
 import time
 import datetime
+from bs4 import BeautifulSoup
+import requests
 
 
 class NekretnineRsScraper(AbstractScraper):
-    log = logging.getLogger('NekretnineRsScraper')
-    listing_url = 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/zemlja/srbija/grad/novi-sad/deo-grada/liman-1_liman-2_liman-3_liman-4/kvadratura/50_0/cena/40000_70000/poredjaj-po/datumu_nanize/lista/po_stranici/50/stranica/{PAGE_NUMBER}'
+
+    url = 'https://www.nekretnine.rs/stambeni-objekti/stanovi/izdavanje-prodaja/prodaja/zemlja/srbija/grad/novi-sad/deo-grada/liman-1_liman-2_liman-3_liman-4/kvadratura/50_0/cena/40000_70000/poredjaj-po/datumu_nanize/lista/po_stranici/50/stranica/{PAGE_NUMBER}'
 
     def get_name(self):
         return 'Nekretnine.rs'
 
     def fetch_links(self, page_number):
-        self.browser().open(self.listing_url.replace('{PAGE_NUMBER}', str(page_number)))
-        return [entry.find('a')['href'] for entry in self.browser().get_current_page().find_all('h2', class_='marginB_5')]
+        #self.browser().open(self.url.replace('{PAGE_NUMBER}', str(page_number)))
+        # return [entry.find('a')['href'] for entry in self.browser().get_current_page().find_all('h2', class_='marginB_5')]
+        soup = BeautifulSoup(requests.get(self.url.replace('{PAGE_NUMBER}', str(page_number))).text, 'lxml')
+        return [entry.find('a')['href'] for entry in soup.find_all('h2', class_='marginB_5')]
+        
 
     def process_link(self, link):
-        self.browser().open(link)
-        page = self.browser().get_current_page()
+        # self.browser().open(link)
+        # page = self.browser().get_current_page()
+        page = BeautifulSoup(requests.get(link).text, 'lxml')
         content = page.find('div', {'id': 'singleContent'})
         # extract title, location, size and price
         title = content.find('h1', {'itemprop': 'itemreviewed'}).string

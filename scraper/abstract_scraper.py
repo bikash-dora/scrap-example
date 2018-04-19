@@ -1,13 +1,8 @@
 import hashlib
-import mechanicalsoup
 import logging
-
-log = logging.getLogger('AbstractScraper')
 
 
 class AbstractScraper:
-
-    _browser = None
 
     def process(self, page_number=1):
         print('Started to scrape {}'.format(self.get_name()))
@@ -33,8 +28,4 @@ class AbstractScraper:
     def get_name(self):
         raise NotImplementedError('Abstract method must be implemented')
 
-    def browser(self):
-        if self._browser is None:
-            self._browser = mechanicalsoup.StatefulBrowser()
-        return self._browser
 

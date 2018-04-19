@@ -3,12 +3,14 @@ import serbian_stemmer as stemmer
 import boto3
 from boto3.dynamodb.conditions import Attr
 from os import environ as env
+import env_helper
 
 
 def handle(event, context):
+    env_helper.check_env(['FILTERED_ADVERTS_TABLE', 'SCRAPED_ADVERTS_TABLE'])
     dynamo_db = boto3.resource('dynamodb')
-    scraped_adverts_table = dynamo_db.Table('ScrapedAdverts-{}'.format(env['STAGE']))
-    filtered_adverts_table = dynamo_db.Table('FilteredAdverts-{}'.format(env['STAGE']))
+    scraped_adverts_table = dynamo_db.Table(env['SCRAPED_ADVERTS_TABLE'])
+    filtered_adverts_table = dynamo_db.Table(env['FILTERED_ADVERTS_TABLE'])
     scraped_adverts = scraped_adverts_table.scan(FilterExpression=Attr('processed').eq(False))
     if scraped_adverts and 'Items' in scraped_adverts:
         filtered_items = get_all_filtered(filtered_adverts_table)

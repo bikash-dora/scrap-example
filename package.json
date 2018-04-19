@@ -6,6 +6,7 @@
     "serverless-finch": "^1.4.0"
   },
   "devDependencies": {
-    "serverless-python-requirements": "^4.0.0"
+    "serverless-python-requirements": "^4.0.0",
+    "serverless-scriptable-plugin": "^0.7.0"
   }
 }
