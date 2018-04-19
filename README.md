@@ -5,7 +5,7 @@ This application demonstrates the usage of Serverless framework to build a simpl
 ## Prerequisites
 
 Before you can try the application, you need the following installed:
-- python 3.6
+- Python 3.6
 - [Node and npm](https://nodejs.org/en/)
 - [Docker](https://www.docker.com/community-edition)
 - [Serverless framework](https://serverless.com/framework/)
@@ -33,7 +33,5 @@ Once you have it configured, you can try out the application.
 - `sls package` will create the packages but won't deploy them
 - `sls deploy` will deploy the application to AWS (will create the stack, will configure the API gateway, will deploy the lambda functions)
 - `sls client deploy` will deploy the frontend to a bucket in S3
-
-
 
  
