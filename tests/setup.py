@@ -6,6 +6,7 @@ sys.path.append('../utils')
 sys.path.append('../aggregator')
 sys.path.append('../scraper')
 sys.path.append('../adverts_controller')
+sys.path.append('../db_cleaner')
 
 setup(
     name='sls-basics-tests',

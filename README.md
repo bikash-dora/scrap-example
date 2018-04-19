@@ -19,8 +19,6 @@ Install the following plugins:
 - `sls plugin install -n serverless-python-requirements`
 - `sls plugin install -n serverless-finch`
 
-Once you have it configured, you can try out the application.
-
 ## Running the tests
 
 - create a virtual in the root of the project: `virtualenv venv`

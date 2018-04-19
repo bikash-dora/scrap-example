@@ -3,12 +3,13 @@ import moto
 import boto3
 import simplejson as json
 import os
+import helper
 
 
 @moto.mock_dynamodb2
 def test_adverts_controller_get_valid_pages():
-    setup_env()
-    populate_table(create_table(boto3.resource('dynamodb'), 'filtered', 'title_hash', 'S'))
+    helper.set_env({'FILTERED_ADVERTS_TABLE': 'filtered'})
+    populate_table(helper.create_table(boto3.resource('dynamodb'), 'filtered', 'title_hash', 'S'))
 
     for i in range(0, 5):
         response = lambda_handler.handle({
@@ -24,8 +25,8 @@ def test_adverts_controller_get_valid_pages():
 
 @moto.mock_dynamodb2
 def test_adverts_get_non_existing_page():
-    setup_env()
-    populate_table(create_table(boto3.resource('dynamodb'), 'filtered', 'title_hash', 'S'))
+    helper.set_env({'FILTERED_ADVERTS_TABLE': 'filtered'})
+    populate_table(helper.create_table(boto3.resource('dynamodb'), 'filtered', 'title_hash', 'S'))
     response = lambda_handler.handle({'queryStringParameters':{
         'page': '-1'
     }}, None)
@@ -44,32 +45,3 @@ def populate_table(table):
         items = json.load(open('data_files/filtered_adverts_page_{}.json'.format(i), 'r'))
         for item in items['items']:
             table.put_item(Item=item)
-
-
-def create_table(db, tablename, pk_name, pk_type):
-    table = db.create_table(
-        TableName=tablename,
-        KeySchema=[
-            {
-                'AttributeName': pk_name,
-                'KeyType': 'HASH'
-            }
-        ],
-        AttributeDefinitions=[
-            {
-                'AttributeName': pk_name,
-                'AttributeType': pk_type
-            }
-
-        ],
-        ProvisionedThroughput={
-            'ReadCapacityUnits': 5,
-            'WriteCapacityUnits': 5
-        }
-    )
-    db.meta.client.get_waiter('table_exists').wait(TableName=tablename)
-    return table
-
-
-def setup_env():
-    os.environ['FILTERED_ADVERTS_TABLE'] = 'filtered'
