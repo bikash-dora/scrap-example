@@ -1,10 +1,11 @@
 # Serverless app for scraping real estate adverts
 
-This application demonstrates the usage of Serverless framework to build a simple application.
+This application demonstrates the usage of Serverless framework to build a simple application. More detailed info about the application can found [here](https://gitlab.codecentric.de/jozef.jung/sls-basics/blob/master/blogpost.md).
 
 ## Prerequisites
 
 Before you can try the application, you need the following installed:
+
 - Python 3.6
 - [Node and npm](https://nodejs.org/en/)
 - [Docker](https://www.docker.com/community-edition)
@@ -16,6 +17,7 @@ Before you can try the application, you need the following installed:
 Follow the serverless setup guide [here](https://serverless.com/framework/docs/providers/aws/guide/quick-start#pre-requisites).
 
 Install the following plugins:
+
 - `sls plugin install -n serverless-python-requirements`
 - `sls plugin install -n serverless-finch`
 
