@@ -31,5 +31,3 @@ Install the following plugins:
 - `sls package` will create the packages but won't deploy them
 - `sls deploy` will deploy the application to AWS (will create the stack, will configure the API gateway, will deploy the lambda functions)
 - `sls client deploy` will deploy the frontend to a bucket in S3
-
- 
