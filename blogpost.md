@@ -77,6 +77,10 @@ It is a simple static website which fetches and visualizes the data got from `ad
 
 ## Project structure
 
+The project has the following structure:
+
+![project structure](images/project-structure.png)
+
 The main entry point is the `serverless.yml` file which configures the serverless framework for this application. Beside that every function is in its own directory, and every function has its own requirements (`requirements.txt`).
 
 The exceptions are the following directories:
@@ -85,7 +89,7 @@ The exceptions are the following directories:
 - `utils` - contains common helper functions. The content of this directory in included in every packed function.
 - `client/dist` - contains the frontend code (HTML and JS).
 
-### serverless.yml
+### The `serverless.yml`
 
 The main entry point of the project is the `serverless.yml` file. This file tells the serverless framework what do deploy and how.
 
@@ -100,7 +104,7 @@ It consists of the following main parts:
 
 The projects `serverless.yml` can be found [here](https://gitlab.codecentric.de/jozef.jung/sls-basics/blob/master/serverless.yml)
 
-Below is an example which defines a function and creates a DynamoDB table:
+Below is an example which defines a function, configures a http event for the given function and creates a DynamoDB table:
 
 ```yaml
 service: my-sls-service
