@@ -166,7 +166,7 @@ def handler(event, context):
 
 [Boto3](http://boto3.readthedocs.io/en/latest/) library is the de-facto standard in Python to interact with the AWS services. It is available in the AWS Python runtime.
 
-The code which would satisfy the above given example above would look like this:
+The code which would satisfy the above given example would look like this:
 
 ```python
 import boto3
