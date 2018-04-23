@@ -10,6 +10,8 @@ In the past couple of months I am working with serverless technologies and I cam
 
 The application is simple enough to understand, yet not a typical hello word application.
 
+The project can be found on GitLab [here](https://gitlab.codecentric.de/jozef.jung/sls-basics).
+
 ## Concept of serverless
 
 In a nutshell, serverless means that you do not have to think about the servers. Just write the code which executes the business logic. The provider takes care of the rest (spinning up a container, initialization of the execution environment, code execution, scaling, etc.)
