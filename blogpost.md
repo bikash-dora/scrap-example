@@ -19,7 +19,7 @@ This enables fast project setup and efficient development.
 ## Application architecture
 
 The architecture of the application is on the picture below.
-![architecture](https://www.lucidchart.com/publicSegments/view/502202a0-b654-4728-a58d-47bfd646982b/image.png)
+![architecture](https://www.lucidchart.com/publicSegments/view/c4a63dab-e6d6-4116-9e82-8b7be1a7c9e0/image.png)
 
 The architecture consists of the following functions:
 
@@ -28,11 +28,56 @@ The architecture consists of the following functions:
 - `adverts_controller` - acts as request handler for the API Gateway. It is mapped to `GET adverts/get?page=` call.
 - `db_cleaner` - is executed once per day and cleans the `ScrapedAdverts` table. It deletes the entires which are older than 15 days.
 
-The frontend is hosted in a public S3 bucket and can be reached [here](http://adverts-website-bucket.s3-website.eu-central-1.amazonaws.com/). It fetches the advertisements through API Gateway from `adverts_controller`.
+The frontend looks like this:
+
+![screenshot](images/website-screenshot.png)
+
+The frontend is hosted in a public S3 bucket and can be reached [here](http://adverts-website-bucket.s3-website.eu-central-1.amazonaws.com/).
+It is a simple static website which fetches and visualizes the data got from `adverts_controller`. The data is a list of scraped and filtered adverts in JSON format:
+
+```json
+{
+   "items":[
+      {
+         "metadata":[
+            "Key1=Value1",
+            "Key2=Value2"
+         ],
+         "location":[
+            "Location name 1",
+            "Location name 2"
+         ],
+         "area":55,
+         "processed":true,
+         "timestamp":1524463412,
+         "images":[
+            "https://url.to/image.jpg",
+         ],
+         "text":"Longer description of the property",
+         "link":"https://link.to/propery",
+         "advertiser":{
+            "name":"Advertiser name",
+            "phones":[
+               "066 1234567",
+               "021 1234567"
+            ]
+         },
+         "price":66000,
+         "title_hash":"11344e17595d494506e87fa61925018b34443016",
+         "title":"Title of advert"
+      },
+      ...
+   ],
+   "page":0,
+   "number_of_pages":5,
+   "count":124,
+   "page_count":25
+}
+```
 
 ## Project structure
 
-Every function is in its own directory, and every function has its own requirements (`requirements.txt`).
+The main entry point is the `serverless.yml` file which configures the serverless framework for this application. Beside that every function is in its own directory, and every function has its own requirements (`requirements.txt`).
 
 The exceptions are the following directories:
 
@@ -42,151 +87,74 @@ The exceptions are the following directories:
 
 ### serverless.yml
 
-The main entry point of the project is the `serverless.yml` file. This file tells to serverless framework what do deploy and how. Let's go through this file.
+The main entry point of the project is the `serverless.yml` file. This file tells the serverless framework what do deploy and how.
 
-The `provider` part configures the cloud provider, which is AWS in our case. It defines the runtime, region and other common values which are applied to every function. These values are `memorySize`, `timeout` and `iamRoleStatements`. IAM role statements are used to grand or deny actions for certain resources. In this case every resource is allowed to execute any operation on DynamoDB (this approach is the fastest way to set up and test the project, but it allows everything - to overcome this, by default everything should be forbidden IAM role statements should be defined for every resource separately).
+It consists of the following main parts:
 
- ```yaml
-service: sls-basics
+- `provider`: configures the cloud provider, which is AWS in our case. It defines the runtime, region and other common values which are applied to every function.
+- `package`: configures the way of packing the functions.
+- `functions`: defines the lambda functions. Under every function is the configuration for the given function. `handler` specifies the method which is called when the function is invoked. The global configuration values can be overridden in the functions. `event` defines what invokes the function.
+- `resources`: defines the resources which should be created when the application is deployed. The resources part must use [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html) syntax.
+- `plugins`: defines the plugins which are used by serverless framework.
+- `custom`: defines the configuration values for the plugins.
+
+The projects `serverless.yml` can be found [here](https://gitlab.codecentric.de/jozef.jung/sls-basics/blob/master/serverless.yml)
+
+Below is an example which defines a function and creates a DynamoDB table:
+
+```yaml
+service: my-sls-service
 
 provider:
   name: aws
   runtime: python3.6
-  stage: ${opt:stage, 'dev'}
-  region: eu-central-1
-  memorySize: 128
-  timeout: 300
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "dynamoDB:*"
       Resource: "*"
- ```
 
-The `package` part defines how the function should be packed. `individually` means that every function is packed separately. The default value is `false`. With `exclude` you can specify what should be excluded from the package.
-
-```yaml
 package:
   individually: true
-  exclude:
-    - "**/.eggs/**"
-    - "**/.pytest_cache/**"
-    - "**/*.egg-info/**"
-    - "**/tests/**"
-    - "**/__pycache__/**"
-    - "**/*.iml"
-    - "**/setup.py"
-    - "**/test_*.py"
-    - "**/*_test.py"
-```
 
-The `functions` part defines the lambda functions. The functions are defined by the names you give them (e.g.: `scraper`).
-
-Under every function is the configuration for the given function. `handler` specifies the method which is called when the function is invoked. The global configuration values can be overridden in the functions, like the `memorySize`. The first function needs more memory since scraping is more memory intensive task. The environment variables which are going to be available for the function are defined in `environment`.
-
-The `event` defines what invokes the function. In this case there are several cron events and one http event. The same function can be invoked by several different events.
-
-```yaml
 functions:
-  scraper:
+  my_controller:
     handler: lambda_handler.handle
-    module: scraper
-    memorySize: 512
+    module: my_controller
     environment:
-      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
-    events:
-      - schedule: cron(0 6,12,18 * * ? *)
-    vendor: ./utils # workaround for including common libs, since package.include has a bug and not working when package.individually is set to true
-  adverts_controller:
-    handler: lambda_handler.handle
-    module: adverts_controller
-    environment:
-      FILTERED_ADVERTS_TABLE: FilteredAdverts-${opt:stage, self:provider.stage}
+      USERS_TABLE: Users
     events:
       - http:
-          path: adverts/get
+          path: users/get/all
           method: get
-    vendor: ./utils
-  db_cleaner:
-    handler: lambda_handler.handle
-    module: db_cleaner
-    environment:
-      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
-    events:
-      - schedule: cron(0 3 * * ? *)
-    vendor: ./utils
-  aggregator:
-    handler: lambda_handler.handle
-    module: aggregator
-    environment:
-      SCRAPED_ADVERTS_TABLE: ScrapedAdverts-${opt:stage, self:provider.stage}
-      FILTERED_ADVERTS_TABLE: FilteredAdverts-${opt:stage, self:provider.stage}
-    events:
-      - schedule: cron(0/30 6-8,12-14,18-20 * * ? *)
-    vendor: ./utils
-```
 
-The `custom` part contains the configuration for the plugins.
-
-```yaml
-custom:
-  pythonRequirements:
-    dockerizePip: true
-  client:
-    bucketName: adverts-website-bucket
-    distributionFolder: client/dist
-    indexDocument: index.html
-    errorDocument: error.html
-```
-
-The `resources` part defines the resources which should be created when the application is deployed. The resources part must use [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html) syntax. The snippet below creates two tables in DynamoDB.
-
-```yaml
 resources:
   Resources:
-    advertisementsTable:
+    usersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ScrapedAdverts-${opt:stage, self:provider.stage}
+        TableName: Users
         AttributeDefinitions:
-          - AttributeName: title_hash
+          - AttributeName: email
             AttributeType: S
         KeySchema:
-          - AttributeName: title_hash
+          - AttributeName: email
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    filteredAdvertisementsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: FilteredAdverts-${opt:stage, self:provider.stage}
-        AttributeDefinitions:
-          - AttributeName: title_hash
-            AttributeType: S
-        KeySchema:
-          - AttributeName: title_hash
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
-```
 
-The plugin section defines the used plugins by the serverless framework. `serverless-python-requirements` plugin downloads the dependencies for every function based on `requirements.txt` and bundles them with the function. `serverless-finch` is used to deploy the frontend.
-
-```yaml
 plugins:
   - serverless-python-requirements
-  - serverless-finch
 ```
 
-### The code
+### The lambda handler
 
 On AWS lambda, when using Python, the function which are used for handling the invocation should have the following signature:
 
 ```python
 def handler(event, context):
-    pass
+    return
 ```
 
 - `event` holds the data which is passed to function, e.g.: if the handler handles http events, the the request body, the query parameters, path parameters, etc. are passed in the event object.
@@ -194,15 +162,23 @@ def handler(event, context):
 
 [Boto3](http://boto3.readthedocs.io/en/latest/) library is the de-facto standard in Python to interact with the AWS services. It is available in the AWS Python runtime.
 
-### The unit tests
+The code which would satisfy the above given example above would look like this:
+
+```python
+import boto3
+from os import environ as env
+
+
+def handle(event, context):
+    users_table = boto3.resource('dynamodb').Table(env['USERS_TABLE'])
+    return users_table.scan()['Items']
+```
+
+### Testing
 
 So far, so good, it's simple and easy to write functions. But what about the testing? Testing a lambda function by deploying it and invoking, and then watching the logs is a bad idea.
 
 Writing unit tests is a crucial step in writing better code. Fortunately the lambda functions are easily testable. [Moto](http://docs.getmoto.org/en/latest/) is a powerful library for testing lambda function. It mocks AWS services like DynamoDB and the mocked service behaves like the real service.
-
-Tests are using [pytest](https://docs.pytest.org/en/latest/) framework.
-
-In order to execute the tests, you have to set up a python virtualenv, then go to the `tests` directory and invoke `python setup.py test`. This should download and install the dependencies which are required for testing and should run the tests.
 
 ## Notes
 
