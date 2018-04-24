@@ -13,15 +13,11 @@ class OglasiRsScraper(AbstractScraper):
         return 'Oglasi.rs'
 
     def fetch_links(self, page_number):
-        # self.browser().open(self.url.replace('{PAGE_NUMBER}', str(page_number)))
-        # return ['https://www.oglasi.rs{}'.format(a['href']) for a in self.browser().get_current_page().find_all('a', class_='fpogl-list-title')]
         soup = BeautifulSoup(requests.get(self.url.replace('{PAGE_NUMBER}', str(page_number))).text, 'lxml')
         return ['https://www.oglasi.rs{}'.format(a['href']) for a in soup.find_all('a', class_='fpogl-list-title')]
 
 
     def process_link(self, link):
-        # self.browser().open(link)
-        # page = self.browser().get_current_page()
         page = BeautifulSoup(requests.get(link).text, 'lxml')
         content = page.find('div', id='content')
         timestamp = int(time.mktime(datetime.datetime.strptime(' '.join(content.find('time').get_text().split()), '%d.%m.%Y. %H:%M:%S').timetuple()))

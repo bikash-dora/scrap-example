@@ -14,15 +14,11 @@ class NekretnineRsScraper(AbstractScraper):
         return 'Nekretnine.rs'
 
     def fetch_links(self, page_number):
-        #self.browser().open(self.url.replace('{PAGE_NUMBER}', str(page_number)))
-        # return [entry.find('a')['href'] for entry in self.browser().get_current_page().find_all('h2', class_='marginB_5')]
         soup = BeautifulSoup(requests.get(self.url.replace('{PAGE_NUMBER}', str(page_number))).text, 'lxml')
         return [entry.find('a')['href'] for entry in soup.find_all('h2', class_='marginB_5')]
         
 
     def process_link(self, link):
-        # self.browser().open(link)
-        # page = self.browser().get_current_page()
         page = BeautifulSoup(requests.get(link).text, 'lxml')
         content = page.find('div', {'id': 'singleContent'})
         # extract title, location, size and price

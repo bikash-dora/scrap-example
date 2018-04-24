@@ -45,7 +45,7 @@
         </ul>
 </nav>
 <div class="container-fluid" style="padding: 5px auto">
-    <div class="row shadow-sm {{$even ? (((a.timestamp + tz_offset) * 1000) > start_of_day ? 'light-green-background-1' : 'bg-white') : (((a.timestamp + tz_offset) * 1000) > start_of_day ? 'light-green-background-2' : 'bg-light')}}" ng-repeat="a in adverts">
+    <div class="row shadow-sm {{$even ? (((a.timestamp + tz_offset) * 1000) >= start_of_day ? 'light-green-background-1' : 'bg-white') : (((a.timestamp + tz_offset) * 1000) >= start_of_day ? 'light-green-background-2' : 'bg-light')}}" ng-repeat="a in adverts">
         <div class="col-md-8">
             <div class="row">
                 <div class="col-md-6">

@@ -6,7 +6,7 @@ A simple application written in Python using the [*serverless*](https://serverle
 
 I am looking for a flat to buy. Since there are lots of recurring adverts on different ad websites, and the same flats are advertised multiple times to be always on the first page of results, I thought it would be an interesting idea to write an application which scrapes the advertisements from different sites and compares them. The main goal is to make a unique list of advertisements which are browseable.
 
-In the past couple of months I am working with serverless technologies and I came up with the idea to implement this application as a serverless application, document it and share it.
+In the past couple of months I am working with serverless technologies and I came up with the idea to implement this application as a serverless application, document it, and share it in a blog post, as an intro to serverless world with AWS and serverless framework.
 
 The application is simple enough to understand, yet not a typical hello word application.
 
@@ -203,6 +203,6 @@ We've seen that implementing a simple application is easy with the help of serve
 
 There are several things which can be added/improved:
 
-- security: deny all permissions and allow some on function level
+- security: deny all permissions and allow only needed permissions on function level
 - ability to manage ads: add an authenticated user which can manage the scraped adverts
 - make the scraper configurable

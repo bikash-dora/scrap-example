@@ -14,15 +14,11 @@ class NadjiDomRsScraper(AbstractScraper):
         return 'NadjiDom.rs'
 
     def fetch_links(self, page_number):
-        # self.browser().open(self.url.replace('{PAGE_OFFSET}', str((page_number - 1) * 10)))
-        # return [x.find('a')['href'] for x in self.browser().get_current_page().find('div', id='centerContainer-middle').find_all('p', class_='listTitle wordBreak')]
         soup = BeautifulSoup(requests.get(self.url.replace('{PAGE_OFFSET}', str((page_number - 1) * 10))).text, 'lxml')
         return [x.find('a')['href'] for x in soup.find('div', id='centerContainer-middle').find_all('p', class_='listTitle wordBreak')]
         
 
     def process_link(self, link):
-        # self.browser().open(link)
-        # page = self.browser().get_current_page()
         page = BeautifulSoup(requests.get(link).text, 'lxml')
         content = page.find('div', id='details')
         images = []
