@@ -4,7 +4,7 @@ A simple application written in Python using the [*serverless*](https://serverle
 
 ## Background story
 
-I am looking for flat to buy. Since there are lots of recurring adverts on different ad websites, and the same flats are advertised multiple times to be always on the first page of results, I thought it would be an interesting idea to write an application which scrapes the advertisements from different sites and compares them. The main goal is to make a unique list of advertisements which is browseable.
+I am looking for a flat to buy. Since there are lots of recurring adverts on different ad websites, and the same flats are advertised multiple times to be always on the first page of results, I thought it would be an interesting idea to write an application which scrapes the advertisements from different sites and compares them. The main goal is to make a unique list of advertisements which are browseable.
 
 In the past couple of months I am working with serverless technologies and I came up with the idea to implement this application as a serverless application, document it and share it.
 
@@ -20,17 +20,20 @@ This enables fast project setup and efficient development.
 
 ## Application architecture
 
+The application is designed to be hosted entirely on AWS. Lambdas are used to implement the business logic (fetching, processing and filtering the advertisements), and serving the processed data through a HTTP endpoint using API Gateway. DynamoDB is used to store the data. A public S3 bucket is used to host the frontend.
+
 The architecture of the application is on the picture below.
+
 ![architecture](https://www.lucidchart.com/publicSegments/view/c4a63dab-e6d6-4116-9e82-8b7be1a7c9e0/image.png)
 
 The architecture consists of the following functions:
 
 - `scraper` - scrapes the advertisements from three different sites for advertising. It extracts the data from the ads, formats the data and puts the data into `ScrapedAdverts` DynamoDB table. This is a scheduled lambda which is executed 3 time per day.
 - `aggregator` - reads the data from `ScrapedAdverts` table and processes them. Checks if the given advertisement exists in `FilteredAdverts` table by performing a similarity check. If the advertisement exists, it is going to be updated. If it does not exists, the data is going to be inserted. This lambda is also scheduled and runs several times per day. It processes only a chunk of data from `ScrapedAdverts` (the amount of data which is returned in one scan by DynamoDB)
-- `adverts_controller` - acts as request handler for the API Gateway. It is mapped to `GET adverts/get?page=` call.
+- `adverts_controller` - acts as request handler for the API Gateway. It is mapped to `GET /adverts/get?page=` call.
 - `db_cleaner` - is executed once per day and cleans the `ScrapedAdverts` table. It deletes the entires which are older than 15 days.
 
-The frontend looks like this:
+The frontend is a static web site (HTML and JS), which fetches the data from `GET /adverts/get?page=` endpoint ad visualizes it. That is shown on the screenshot below.
 
 ![screenshot](images/website-screenshot.png)
 
@@ -66,9 +69,14 @@ It is a simple static website which fetches and visualizes the data got from `ad
          },
          "price":66000,
          "title_hash":"11344e17595d494506e87fa61925018b34443016",
-         "title":"Title of advert"
-      },
-      ...
+         "title":"Title of advert",
+         "similar_adverts":[
+           {
+             "link":"http://link.to/similar-advert/1",
+             "title":"Similar advert 1"
+           }
+         ]
+      }
    ],
    "page":0,
    "number_of_pages":5,
@@ -79,17 +87,18 @@ It is a simple static website which fetches and visualizes the data got from `ad
 
 ## Project structure
 
-The project has the following structure:
-
-![project structure](images/project-structure.png)
-
-The main entry point is the `serverless.yml` file which configures the serverless framework for this application. Beside that every function is in its own directory, and every function has its own requirements (`requirements.txt`).
-
+The project is structured in a way that every function is in its own folder, and has its own dependencies (`requirements.txt`).
 The exceptions are the following directories:
 
 - `tests` - contains the unit tests.
 - `utils` - contains common helper functions. The content of this directory in included in every packed function.
 - `client/dist` - contains the frontend code (HTML and JS).
+
+In the root of the project is the file `serverless.yml` which is the main entry point. This file configures the serverless framework for this application.
+
+The project has the following structure:
+
+![project structure](images/project-structure.png)
 
 ### The `serverless.yml`
 
@@ -156,7 +165,7 @@ plugins:
 
 ### The lambda handler
 
-On AWS lambda, when using Python, the function which are used for handling the invocation should have the following signature:
+On AWS lambda, when using Python, the function which is used for handling the invocation should have the following signature:
 
 ```python
 def handler(event, context):
@@ -186,9 +195,7 @@ So far, so good, it's simple and easy to write functions. But what about the tes
 
 Writing unit tests is a crucial step in writing better code. Fortunately the lambda functions are easily testable. [Moto](http://docs.getmoto.org/en/latest/) is a powerful library for testing lambda function. It mocks AWS services like DynamoDB and the mocked service behaves like the real service.
 
-## Notes
-
-Please check out the project's [readme file](https://gitlab.codecentric.de/jozef.jung/sls-basics/blob/master/README.md). It contains the steps how to set up the application, how to run the tests anf how to deploy it.
+You can find more about testing in the projects [readme file](https://gitlab.codecentric.de/jozef.jung/sls-basics/blob/master/README.md).
 
 ## Conclusion
 
