@@ -24,7 +24,7 @@ The application is designed to be hosted entirely on AWS. Lambdas are used to im
 
 The architecture of the application is on the picture below.
 
-![architecture](https://www.lucidchart.com/publicSegments/view/c4a63dab-e6d6-4116-9e82-8b7be1a7c9e0/image.png)
+![architecture](images/adverts-scraper-architecture.png)
 
 The architecture consists of the following functions:
 
@@ -35,7 +35,7 @@ The architecture consists of the following functions:
 
 The frontend is a static web site (HTML and JS), which fetches the data from `GET /adverts/get?page=` endpoint ad visualizes it. That is shown on the screenshot below.
 
-![screenshot](images/website-screenshot.png)
+![screenshot](images/adverts-scraper-website-screenshot.png)
 
 The frontend is hosted in a public S3 bucket and can be reached [here](http://adverts-website-bucket.s3-website.eu-central-1.amazonaws.com/).
 It is a simple static website which fetches and visualizes the data got from `adverts_controller`. The data is a list of scraped and filtered adverts in JSON format:
@@ -98,7 +98,7 @@ In the root of the project is the file `serverless.yml` which is the main entry 
 
 The project has the following structure:
 
-![project structure](images/project-structure.png)
+![project structure](images/adverts-scraper-project-structure.png)
 
 ### The `serverless.yml`
 
